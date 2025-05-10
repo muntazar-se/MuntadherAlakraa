@@ -10,7 +10,7 @@ export default function AdminDashboard() {
       <Sidebar />
       <div className="flex flex-col flex-1 p-4">
         <Header />
-        <DashboardCards />
+      
         <UsersTable />
       </div>
     </div>
