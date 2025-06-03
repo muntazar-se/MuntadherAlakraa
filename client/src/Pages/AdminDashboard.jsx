@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ProjectsManager from "../components/ProjectsManager";
-import UploadCv from "../components/UploadCv";
+import UploadCV from "../components/UploadCV";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
@@ -164,7 +164,7 @@ export default function AdminDashboard() {
       <section>
         <h2 className="text-2xl font-semibold mb-4">Upload CV</h2>
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-          <UploadCv />
+          <UploadCV />
         </div>
       </section>
 

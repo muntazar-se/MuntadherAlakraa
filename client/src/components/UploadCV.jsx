@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const UploadCv = () => {
+const UploadCV = () => {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState("");
   const [downloadUrl, setDownloadUrl] = useState("");
@@ -95,9 +95,9 @@ const UploadCv = () => {
             <div className="text-red-600">{status}</div>
           )}
         </div>
-      )}
+      )}aa
     </div>
   );
 };
 
-export default UploadCv;
+export default UploadCV;
