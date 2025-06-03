@@ -11,11 +11,11 @@ import {
   FaWhatsapp,
 } from "react-icons/fa6";
 
-import SkillsSection from "../../public/components/SkillsSection";
-import ProjectsSection from "../../public/components/ProjectsSection";
+import SkillsSection from "../components/SkillsSection";
+import ProjectsSection from "../components/ProjectsSection";
 
 // Inside your Home component's return:
-<ProjectsSection />
+<ProjectsSection />;
 
 function Home() {
   const [profile, setProfile] = useState(null);
@@ -52,7 +52,6 @@ function Home() {
   // useEffect(() => {
   //   getProjects();
   // }, []);
-
 
   return (
     <div className="flex justify-center w-full">
@@ -478,7 +477,7 @@ function Home() {
       </motion.div>
     </motion.div>
   ))} */}
-  <ProjectsSection/>
+            <ProjectsSection />
 
             <div className="techs-section mt-20 lg:-mt-20">
               {/* <div className="flex flex-col items-center justify-center min-h-screen text-white"> */}

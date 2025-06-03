@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import ProjectsManager from "../../public/components/ProjectsManager";
-import UploadCv from "../../public/components/UploadCv";
+import ProjectsManager from "../components/ProjectsManager";
+import UploadCv from "../components/UploadCv";
 import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
@@ -52,20 +52,27 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 space-y-10 text-white bg-gray-900 min-h-screen">
-      <h1 className="text-3xl font-bold flex justify-center text-lime-500">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold flex justify-center text-lime-500">
+        Admin Dashboard
+      </h1>
 
       <section>
         <h2 className="text-2xl font-semibold mb-4">General Information</h2>
 
         {profile ? (
-          <form onSubmit={handleProfileUpdate} className="space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+          <form
+            onSubmit={handleProfileUpdate}
+            className="space-y-6 bg-gray-800 p-6 rounded-lg shadow-lg"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <p className="text-sm font-medium text-gray-200 mb-1">Title:</p>
                 <input
                   className="w-full border border-gray-700 bg-gray-700 text-white p-2 rounded"
                   value={profile.title}
-                  onChange={(e) => setProfile({ ...profile, title: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, title: e.target.value })
+                  }
                   placeholder="e.g. Full Stack Developer"
                 />
               </div>
@@ -75,17 +82,23 @@ export default function AdminDashboard() {
                 <input
                   className="w-full border border-gray-700 bg-gray-700 text-white p-2 rounded"
                   value={profile.email}
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, email: e.target.value })
+                  }
                   placeholder="e.g. your@email.com"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <p className="text-sm font-medium text-gray-200 mb-1">CV Link:</p>
+                <p className="text-sm font-medium text-gray-200 mb-1">
+                  CV Link:
+                </p>
                 <input
                   className="w-full border border-gray-700 bg-gray-700 text-white p-2 rounded"
                   value={profile.cvLink}
-                  onChange={(e) => setProfile({ ...profile, cvLink: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, cvLink: e.target.value })
+                  }
                   placeholder="Paste your CV link or leave it empty"
                 />
               </div>
@@ -95,7 +108,9 @@ export default function AdminDashboard() {
                 <textarea
                   className="w-full border border-gray-700 bg-gray-700 text-white p-2 rounded"
                   value={profile.bio}
-                  onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                  onChange={(e) =>
+                    setProfile({ ...profile, bio: e.target.value })
+                  }
                   placeholder="Write a short bio about yourself"
                   rows="4"
                 />
@@ -104,27 +119,33 @@ export default function AdminDashboard() {
 
             {/* Social Media Section */}
             <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-200">Social Media Links:</p>
+              <p className="text-sm font-medium text-gray-200">
+                Social Media Links:
+              </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {Object.entries(profile.socialMedia || {}).map(([platform, url]) => (
-                  <div key={platform}>
-                    <p className="text-xs text-gray-400 mb-1 capitalize">{platform}:</p>
-                    <input
-                      className="w-full border border-gray-700 bg-gray-700 text-white p-2 rounded"
-                      value={url}
-                      onChange={(e) =>
-                        setProfile({
-                          ...profile,
-                          socialMedia: {
-                            ...profile.socialMedia,
-                            [platform]: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder={`Enter your ${platform} link`}
-                    />
-                  </div>
-                ))}
+                {Object.entries(profile.socialMedia || {}).map(
+                  ([platform, url]) => (
+                    <div key={platform}>
+                      <p className="text-xs text-gray-400 mb-1 capitalize">
+                        {platform}:
+                      </p>
+                      <input
+                        className="w-full border border-gray-700 bg-gray-700 text-white p-2 rounded"
+                        value={url}
+                        onChange={(e) =>
+                          setProfile({
+                            ...profile,
+                            socialMedia: {
+                              ...profile.socialMedia,
+                              [platform]: e.target.value,
+                            },
+                          })
+                        }
+                        placeholder={`Enter your ${platform} link`}
+                      />
+                    </div>
+                  )
+                )}
               </div>
             </div>
 
