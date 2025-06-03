@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 // https://vite.dev/config/
 export default defineConfig({
+  root: 'client',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
