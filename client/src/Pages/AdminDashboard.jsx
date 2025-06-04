@@ -30,7 +30,7 @@ export default function AdminDashboard() {
         setProfile(response.data);
       }
     } catch (error) {
-      console.log("Error fetching profile:", error);
+      console.log("from admindhasboard Error fetching profile: ", error);
       if (error.response?.status === 401) {
         // Invalid or expired token
         localStorage.removeItem("token");

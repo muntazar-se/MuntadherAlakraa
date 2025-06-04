@@ -9,7 +9,7 @@ exports.getProfile = async (req, res) => {
     }
     res.status(200).json(profile);
   } catch (error) {
-    console.error("Error fetching profile:", error);
+    console.error("from profile controller Error fetching profile:", error);
     res.status(500).json({ message: "Failed to fetch profile" });
   }
 };

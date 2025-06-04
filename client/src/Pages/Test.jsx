@@ -12,7 +12,7 @@ function Test() {
         setProfile(response.data); // save data to state
       }
     } catch (error) {
-      console.log("Error fetching profile:", error);
+      console.log("from test Error fetching profile:", error);
     }
   };
 

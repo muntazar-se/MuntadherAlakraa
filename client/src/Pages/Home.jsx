@@ -28,7 +28,7 @@ function Home() {
         setProfile(response.data); // save data to state
       }
     } catch (error) {
-      console.log("Error fetching profile:", error);
+      console.log("from home Error fetching profile:", error);
     }
   };
 
