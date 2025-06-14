@@ -13,28 +13,94 @@ import {
 
 import SkillsSection from "../components/SkillsSection";
 import ProjectsSection from "../components/ProjectsSection";
+import LoadingComponent from "../components/LoadingComponent";
 
 // Inside your Home component's return:
-<ProjectsSection />;
+<ProjectsSection id="projects" />;
 
 function Home() {
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeSection, setActiveSection] = useState("Home");
+  const apiURL = import.meta.env.VITE_API_URL;
 
   const getProfile = async () => {
     try {
-      const response = await axios.get("/api/profile");
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(`${apiURL}/profile`);
       if (response) {
         console.log("the data is >>>>", response.data);
         setProfile(response.data); // save data to state
       }
     } catch (error) {
       console.log("from home Error fetching profile:", error);
+      setError("Failed to load profile data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Scroll detection for active section
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ["Home", "Projects", "Technologies", "Contact"];
+      const scrollPosition = window.scrollY + 100; // Offset for navbar height
+
+      for (const section of sections) {
+        const element = document.getElementById(section.toLowerCase());
+        if (element) {
+          const offsetTop = element.offsetTop;
+          const offsetHeight = element.offsetHeight;
+          
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Smooth scroll to section
+  const scrollToSection = (sectionName) => {
+    const element = document.getElementById(sectionName.toLowerCase());
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+      setActiveSection(sectionName);
     }
   };
 
   useEffect(() => {
     getProfile();
   }, []);
+
+  // Show loading component while data is being fetched
+  if (loading) {
+    return <LoadingComponent />;
+  }
+
+  // Show error message if there's an error
+  if (error) {
+    return (
+      <div className="flex justify-center items-center w-full h-screen bg-[#0f1624]">
+        <div className="text-center">
+          <h2 className="text-2xl font-light text-white mb-4">Error Loading Portfolio</h2>
+          <p className="text-gray-400 mb-6">{error}</p>
+          <button
+            onClick={getProfile}
+            className="px-6 py-2 bg-gradient-to-r from-blue-400 to-purple-500 text-white rounded-lg hover:opacity-80 transition-opacity"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // const [projects, setProjects] = useState(null);
   // const getProjects = async () => {
@@ -53,6 +119,26 @@ function Home() {
   //   getProjects();
   // }, []);
 
+  // CV Download function - uses Dropbox link directly
+  const downloadCV = () => {
+    // Use CV link from database (should be the Dropbox link)
+    const cvLink = profile?.cvLink;
+    
+    if (!cvLink) {
+      alert("CV link not available. Please contact the administrator.");
+      return;
+    }
+    
+    try {
+      // Open the CV link directly in a new tab
+      // This will work for Dropbox, Google Drive, or any direct link
+      window.open(cvLink, '_blank');
+    } catch (error) {
+      console.error('Error opening CV:', error);
+      alert("Error opening CV. Please try again.");
+    }
+  };
+
   return (
     <div className="flex justify-center w-full">
       <div className="main-container max-w-6xl w-full ">
@@ -61,8 +147,8 @@ function Home() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
-              duration: 0.6,
-              ease: "easeOut",
+              duration: 0.8,
+              ease: [0.25, 0.46, 0.45, 0.94],
             }}
             className="navbar flex-row justify-between text-gray-200 hidden
   lg:flex lg:justify-between lg:w-full lg:px-6 py-4 border-b-[0.5px] border-gray-600 sticky top-0 backdrop-blur-sm bg-[#0f1624]/80 z-50"
@@ -94,30 +180,45 @@ function Home() {
               {["Projects", "Technologies", "Contact"].map((item, index) => (
                 <motion.p
                   key={item}
-                  initial={{ opacity: 0, y: -10 }}
+                  initial={{ opacity: 0, y: -15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{
-                    duration: 0.4,
-                    delay: 0.2 + index * 0.1,
-                    type: "spring",
-                    stiffness: 100,
+                    duration: 0.6,
+                    delay: 0.3 + index * 0.15,
+                    ease: [0.25, 0.46, 0.45, 0.94],
                   }}
-                  whileHover={{ y: -2 }}
-                  className="cursor-pointer relative group"
+                  whileHover={{ y: -3 }}
+                  onClick={() => scrollToSection(item)}
+                  className={`cursor-pointer relative group pb-1 ${
+                    activeSection === item ? "text-white" : "text-gray-200"
+                  }`}
                 >
                   <motion.span className="relative z-10 transition-all duration-300 group-hover:text-white">
                     {item}
                   </motion.span>
+                  
+                  {/* Active section bottom border */}
+                  {activeSection === item && (
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-500"
+                    />
+                  )}
+                  
+                  {/* Hover bottom border */}
                   <motion.span
                     initial={{ width: 0 }}
                     whileHover={{ width: "100%" }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
                     className="absolute bottom-0 left-0 bg-gradient-to-r from-blue-400 to-purple-500 h-px"
                   ></motion.span>
+                  
                   <motion.span
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ duration: 0.4 }}
                     className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-purple-500/0 blur-sm group-hover:from-blue-500/10 group-hover:to-purple-500/10 rounded-md -z-10 h-px"
                   ></motion.span>
                 </motion.p>
@@ -136,7 +237,7 @@ function Home() {
                   icon: "FaEnvelope",
                 },
                 {
-                  href: `${profile?.socialMedia?.linketwitterdin}`,
+                  href: `${profile?.socialMedia?.twitter}`,
                   icon: "FaXTwitter",
                 },
               ].map((link, index) => (
@@ -150,33 +251,32 @@ function Home() {
                       : undefined
                   }
                   className="relative group p-2 transition-all duration-300"
-                  initial={{ opacity: 0, scale: 0 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{
-                    duration: 0.4,
-                    delay: 0.4 + index * 0.1,
-                    type: "spring",
-                    stiffness: 200,
+                    duration: 0.5,
+                    delay: 0.6 + index * 0.1,
+                    ease: [0.25, 0.46, 0.45, 0.94],
                   }}
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
+                  whileHover={{ scale: 1.15, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <motion.span
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.3 }}
                     className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-md"
                   ></motion.span>
                   <motion.span
                     initial={{ opacity: 0 }}
                     whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: 0.3 }}
                     className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10"
                   ></motion.span>
                   {link.icon === "FaLinkedin" && (
                     <motion.div
-                      whileHover={{ rotate: 10 }}
-                      transition={{ duration: 0.2, type: "spring" }}
+                      whileHover={{ rotate: 5 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
                     >
                       <FaLinkedin
                         size={20}
@@ -186,8 +286,8 @@ function Home() {
                   )}
                   {link.icon === "FaEnvelope" && (
                     <motion.div
-                      whileHover={{ rotate: 10 }}
-                      transition={{ duration: 0.2, type: "spring" }}
+                      whileHover={{ rotate: 5 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
                     >
                       <FaEnvelope
                         size={20}
@@ -197,8 +297,8 @@ function Home() {
                   )}
                   {link.icon === "FaXTwitter" && (
                     <motion.div
-                      whileHover={{ rotate: 10 }}
-                      transition={{ duration: 0.2, type: "spring" }}
+                      whileHover={{ rotate: 5 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
                     >
                       <FaXTwitter
                         size={20}
@@ -212,13 +312,18 @@ function Home() {
           </motion.div>
           <div className="sections lg:px-15">
             <motion.div
+              id="home"
               className="hero-section flex flex-col justify-center items-center w-full h-full mb-[500px] mt-2 
           lg:flex lg:flex-row lg:mt-40 lg:mb-55 md:flex lg:justify-evenly
           
           "
-              initial={{ y: "-50%", opacity: 0 }}
+              initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ duration: 1.5, ease: "easeOut" }}
+              transition={{ 
+                duration: 1.2, 
+                ease: [0.25, 0.46, 0.45, 0.94],
+                delay: 0.2
+              }}
             >
               <div
                 className="title mb-4 
@@ -226,9 +331,13 @@ function Home() {
           lg:flex lg:flex-col lg:gap-10 lg:justify-start lg:items-start"
               >
                 <motion.h1
-                  initial={{ x: "100%", opacity: 0 }}
+                  initial={{ x: -50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 0.9, ease: "easeOut" }}
+                  transition={{ 
+                    duration: 1.0, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 0.4
+                  }}
                   className="text-my1-gradient text-3xl font-light 
               lg:text-4xl lg:font-bold lg:flex 
               "
@@ -238,13 +347,17 @@ function Home() {
                 <motion.p
                   initial={{
                     opacity: 0,
-                    textShadow: "0px 0px 0px rgba(255, 255, 255, 0)", // No shadow
+                    y: 20,
                   }}
                   animate={{
                     opacity: 1,
-                    textShadow: "0px 0px 5px rgba(255, 255, 255, 0.5)", // Reduced white glow
+                    y: 0,
                   }}
-                  transition={{ duration: 1, ease: "easeInOut", yoyo: 1 }}
+                  transition={{ 
+                    duration: 1.0, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 0.6
+                  }}
                   className="text-xl font-light text-white
                 lg:text-2xl
                 "
@@ -252,42 +365,45 @@ function Home() {
                   {profile?.title}
                 </motion.p>
                 <motion.p
-                  initial={{ x: "-100%", opacity: 0 }}
+                  initial={{ x: -30, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
-                  transition={{ duration: 1.2, ease: "easeOut" }}
+                  transition={{ 
+                    duration: 1.1, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 0.8
+                  }}
                   className="about max-w-4/5 text-gray-400 font-light 
                 lg:max-w-4/5 lg:text-sm
                 "
                 >
                   {profile?.bio}
-
-                  {/* Bringing modern technologies into the real world is in my{" "}
-                  <span className="text-my1-gradient">DNA</span>. I have worked
-                  on full-stack web applications using React, Node.js, and
-                  MongoDB. I focus on building intuitive and efficient solutions
-                  that bridge technology with real-world needs. */}
                 </motion.p>
 
-                <button
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.8, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 1.0
+                  }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    y: -2,
+                    transition: { duration: 0.3, ease: "easeOut" }
+                  }}
+                  whileTap={{ scale: 0.98 }}
                   className="hidden lg:block w-35 h-10 text-sm rounded-4xl z-11 font-light relative overflow-hidden transition-all duration-300 
              shadow-[0_10px_15px_rgba(0,178,255,0.35)] group cursor-pointer"
                   style={{
                     background:
                       "linear-gradient(270deg, #13ADC7, #6978D1, #945DD6) border-box",
                   }}
-                  onClick={() => {
-                    const link = document.createElement("a");
-                    link.href =
-                      "https://drive.usercontent.google.com/download?id=1wpznr-aoF2cxRNjRzJfNVMT1J6Yxh1of&export=download&authuser=1&confirm=t&uuid=ac9e4177-b752-4378-ae20-945473c25415&at=ALoNOglUIjbgYCk29MfdHPPZ_9_d:1748514308009";
-                    link.download = "Muntadher_AlAkraa_CV.pdf"; // filename you want
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                  }}
+                  onClick={downloadCV}
                 >
                   <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
                   Download CV
-                </button>
+                </motion.button>
               </div>
 
               <div className="circles relative lg:h-full lg:w-fit lg:-left-30">
@@ -303,9 +419,35 @@ function Home() {
                     maskComposite: "exclude", // Standard property for masking
                     border: "1px solid transparent", // Transparent border to hold the gradient
                   }}
-                />
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ 
+                    opacity: 1, 
+                    scale: 1,
+                    rotate: 360
+                  }}
+                  transition={{ 
+                    duration: 1.0, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 0.6,
+                    rotate: {
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }
+                  }}
+                >
+                  <motion.div
+                    className="w-full h-full rounded-full"
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  />
+                </motion.div>
 
-                <div
+                <motion.div
                   className="w-30 h-30 rounded-full shadow-[0_10px_15px_rgba(0,178,255,0.35)] absolute top-50 animate-pulse
               lg:w-40 lg:h-40 lg:-right-25 lg:top-15 lg:z-2
               "
@@ -314,9 +456,35 @@ function Home() {
                       "linear-gradient(330deg,#00B2FF , #13ADC7, #6978D1) border-box",
                     animation: "float 3s ease-in-out infinite",
                   }}
-                ></div>
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ 
+                    opacity: 1, 
+                    scale: 1,
+                    rotate: 360
+                  }}
+                  transition={{ 
+                    duration: 1.0, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 0.8,
+                    rotate: {
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }
+                  }}
+                >
+                  <motion.div
+                    className="w-full h-full rounded-full"
+                    animate={{ rotate: 360 }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  />
+                </motion.div>
 
-                <div
+                <motion.div
                   className="image absolute h-60 w-60 rounded-full p-[1px] -right-20 top-10 z-10
               lg:w-40 lg:h-40 lg:-top-10 lg:-right-5
               "
@@ -324,18 +492,27 @@ function Home() {
                     background:
                       "linear-gradient(330deg, #13ADC7, #6978D1, #945DD6) border-box",
                   }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ 
+                    opacity: 1, 
+                    scale: 1
+                  }}
+                  transition={{ 
+                    duration: 1.0, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 1.0
+                  }}
                 >
                   <img
                     src="./my-image.jpg"
                     alt=""
                     className=" rounded-full left-50 z-10  shadow-[0_10px_15px_rgba(0,178,255,0.35)]"
                   />
-                </div>
+                </motion.div>
                 <div className="big-circel">
                   <motion.div
-                    className="w-80 h-80 rounded-full bg-transparent  items-center justify-center hidden 
+                    className="w-80 h-80 rounded-full bg-transparent items-center justify-center hidden 
           lg:flex
-        
         "
                     style={{
                       boxShadow: "0 0 0 1px transparent", // Transparent border placeholder
@@ -347,11 +524,48 @@ function Home() {
                       maskComposite: "exclude", // Standard property for masking
                       border: "1px solid transparent", // Transparent border to hold the gradient
                     }}
-                    whileHover={{ scale: 1.5 }}
-                    transition={{ duration: 1, ease: "easeInOut" }}
-                  />
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ 
+                      opacity: 1, 
+                      scale: 1,
+                      rotate: 360
+                    }}
+                    transition={{ 
+                      duration: 1.0, 
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                      delay: 0.6,
+                      rotate: {
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }
+                    }}
+                  >
+                    <motion.div
+                      className="w-full h-full rounded-full"
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }}
+                    />
+                  </motion.div>
                 </div>
-                <button
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 0.8, 
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                    delay: 1.2
+                  }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    y: -2,
+                    transition: { duration: 0.3, ease: "easeOut" }
+                  }}
+                  whileTap={{ scale: 0.98 }}
                   className="w-40 h-15 rounded-4xl z-11 absolute -right-1 top-85 shadow-[0_10px_15px_rgba(0,178,255,0.35)]
               lg:hidden
               "
@@ -359,9 +573,10 @@ function Home() {
                     background:
                       "linear-gradient(270deg, #13ADC7, #6978D1, #945DD6) border-box ",
                   }}
+                  onClick={downloadCV}
                 >
                   Download CV
-                </button>
+                </motion.button>
               </div>
             </motion.div>
             {/* ----------------------------------------------------------------------------------
@@ -477,15 +692,13 @@ function Home() {
       </motion.div>
     </motion.div>
   ))} */}
-            <ProjectsSection />
+            <ProjectsSection id="projects" />
 
-            <div className="techs-section mt-20 lg:-mt-20">
-              {/* <div className="flex flex-col items-center justify-center min-h-screen text-white"> */}
-
+            <div id="technologies" className="techs-section mt-20 lg:-mt-20">
               <SkillsSection />
-              {/* </div> */}
             </div>
             <div
+              id="contact"
               className="contact flex justify-center mt-15 flex-col 
         lg:mt-1
         "

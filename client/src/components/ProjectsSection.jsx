@@ -3,17 +3,26 @@ import { motion } from "framer-motion";
 import { FaGithub } from "react-icons/fa";
 import axios from "axios";
 
-const ProjectsSection = () => {
+const ProjectsSection = ({ id }) => {
   const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const apiURL = import.meta.env.VITE_API_URL;
 
   const getProjects = async () => {
     try {
-      const response = await fetch("/api/projects");
-      const data = await response.json();
-      setProjects(data);
-      console.error(`projects data is>>>:::::${response}`);
+      setLoading(true);
+      setError(null);
+      const response = await axios.get(`${apiURL}/projects`);
+      if (response) {
+        console.log("projects data is>>>:::::", response.data);
+        setProjects(response.data);
+      }
     } catch (error) {
-      console.error("Failed to fetch projectsss:", error);
+      console.error("Failed to fetch projects:", error);
+      setError("Failed to load projects");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -22,7 +31,7 @@ const ProjectsSection = () => {
   }, []);
 
   return (
-    <div className="projects-section h-full mt-32 mb-32">
+    <div id={id} className="projects-section h-full mt-32 mb-32">
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -34,6 +43,7 @@ const ProjectsSection = () => {
           initial={{ y: 20 }}
           whileInView={{ y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
+          viewport={{ once: true }}
           className="section-title text-2xl mb-6 font-light flex justify-center"
         >
           My Projects
@@ -42,6 +52,7 @@ const ProjectsSection = () => {
           initial={{ scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           transition={{ duration: 0.8, delay: 0.4 }}
+          viewport={{ once: true }}
           className="flex flex-row justify-center"
         >
           <div className="line bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 h-[0.4px] w-1/3 lg:-mt-1 lg:mb-15"></div>
@@ -50,12 +61,10 @@ const ProjectsSection = () => {
 
       <motion.div
         className="cards grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10 justify-items-center"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: { opacity: 0 },
-          visible: { opacity: 1, transition: { duration: 0.5 } },
-        }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        viewport={{ once: true }}
       >
         {projects.map((project, index) => (
           <motion.div
@@ -80,13 +89,6 @@ const ProjectsSection = () => {
               }}
             >
               <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-transparent to-blue-900/10 z-0"
-                initial={{ opacity: 0 }}
-                whileHover={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              />
-
-              <motion.div
                 className="h-[190px] w-[290px] -mt-15 mb-4 overflow-hidden rounded-lg"
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
@@ -105,6 +107,7 @@ const ProjectsSection = () => {
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: 0.2 + index * 0.1 }}
+                viewport={{ once: true }}
               >
                 {project.name}
               </motion.h2>
@@ -114,6 +117,7 @@ const ProjectsSection = () => {
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
+                viewport={{ once: true }}
               >
                 {project.description}
               </motion.p>
@@ -123,26 +127,50 @@ const ProjectsSection = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: 0.4 + index * 0.1 }}
+                viewport={{ once: true }}
               >
                 {project.liveLink && (
                   <motion.a
                     href={project.liveLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative h-10 rounded-4xl w-fit px-6 overflow-hidden group"
+                    className="relative h-10 rounded-4xl w-fit px-6 overflow-hidden group flex items-center justify-center"
                     style={{
                       background:
                         "linear-gradient(270deg, #13ADC7, #6978D1, #945DD6) border-box",
                     }}
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ 
+                      scale: 1.02,
+                      boxShadow: "0 5px 15px rgba(19, 173, 199, 0.3)"
+                    }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <motion.span
-                      className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"
-                      initial={{ opacity: 0 }}
-                      whileHover={{ opacity: 0.2 }}
+                    {/* Professional Light Indicator */}
+                    <motion.div
+                      className="absolute left-3 w-2 h-2 rounded-full bg-cyan-400 transition-all duration-300"
+                      initial={{ opacity: 0.6 }}
+                      whileHover={{ 
+                        opacity: 1,
+                        scale: 1.5,
+                        boxShadow: "0 0 15px rgba(34, 211, 238, 0.9), 0 0 25px rgba(34, 211, 238, 0.6), 0 0 35px rgba(34, 211, 238, 0.3), inset 0 0 8px rgba(255, 255, 255, 0.4)"
+                      }}
+                      animate={{
+                        boxShadow: [
+                          "0 0 0px rgba(34, 211, 238, 0)",
+                          "0 0 8px rgba(34, 211, 238, 0.7)",
+                          "0 0 0px rgba(34, 211, 238, 0)"
+                        ]
+                      }}
+                      transition={{
+                        boxShadow: {
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }
+                      }}
                     />
-                    Live Preview
+                    
+                    <span className="text-white text-sm font-medium ml-3">Live Preview</span>
                   </motion.a>
                 )}
 
@@ -151,20 +179,21 @@ const ProjectsSection = () => {
                     href={project.githubLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="h-10 px-4 flex items-center space-x-1 rounded-4xl border-gray-400 border-1 group"
+                    className="h-10 px-5 flex items-center space-x-1 rounded-4xl border-gray-400 border-1 group cursor-pointer"
                     whileHover={{
                       scale: 1.05,
                       borderColor: "#6978D1",
+                      boxShadow: "0 5px 15px rgba(105, 120, 209, 0.3)"
                     }}
                     whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    <p>GitHub</p>
+                    <p className="text-white text-sm">GitHub</p>
                     <motion.div
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.5 }}
+                      className="group-hover:rotate-360 transition-transform duration-500"
                     >
                       <FaGithub
-                        size={30}
+                        size={24}
                         color="white"
                         className="group-hover:text-blue-400 transition-colors duration-300"
                       />
@@ -185,20 +214,19 @@ const ProjectsSection = () => {
         viewport={{ once: true }}
       >
         <motion.button
-          className="px-8 py-3 rounded-4xl relative overflow-hidden group"
+          className="px-4 w-fit h-11 text-sm rounded-4xl z-11 font-light relative overflow-hidden transition-all duration-300 
+             shadow-[0_10px_15px_rgba(0,178,255,0.35)] group cursor-pointer"
           style={{
             background:
               "linear-gradient(270deg, #13ADC7, #6978D1, #945DD6) border-box",
           }}
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ 
+            scale: 1.05,
+            boxShadow: "0 5px 15px rgba(19, 173, 199, 0.3)"
+          }}
           whileTap={{ scale: 0.95 }}
         >
-          <motion.span
-            className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"
-            initial={{ opacity: 0 }}
-            whileHover={{ opacity: 0.2 }}
-          />
-          View More Projects
+          <span className="text-white font-medium ">View More Projects</span>
         </motion.button>
       </motion.div>
     </div>

@@ -6,6 +6,7 @@ const profileSchema = new mongoose.Schema(
     bio: String,
     email: String,
     cvLink: String,
+    cvKey: String,
     socialMedia: {
       linkedin: String,
       github: String,
